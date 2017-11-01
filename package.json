@@ -1,0 +1,49 @@
+{
+  "name": "messenger-platform",
+  "version": "0.0.1",
+  "description": "Client/Server for FB messenger platform written in TypeScript",
+  "main": "dist/index",
+  "typings": "dist/index",
+  "scripts": {
+    "test": "mocha --exit --recursive dist/test",
+    "precommit": "npm run compile && lint-staged",
+    "prepublishOnly": "npm run compile",
+    "compile": "npm run clean && tsc -p .",
+    "watch": "tsc -w -p .",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "fb messenger"
+  ],
+  "author": "Oleksii Rudenko <alexei.rudenko@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chai": "4.0.4",
+    "@types/debug": "0.0.30",
+    "@types/koa": "2.0.39",
+    "@types/koa-bodyparser": "3.0.25",
+    "@types/mocha": "2.2.44",
+    "@types/node": "8.0.47",
+    "chai": "4.1.2",
+    "husky": "0.14.3",
+    "lint-staged": "4.3.0",
+    "mocha": "4.0.1",
+    "prettier": "1.7.4",
+    "typescript": "2.5.3"
+  },
+  "dependencies": {
+    "debug": "^3.1.0",
+    "koa": "2.3.0",
+    "koa-bodyparser": "4.2.0",
+    "r2": "2.0.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "lint-staged": {
+    "*.ts": [
+      "prettier --single-quote --trailing-comma all --write",
+      "git add"
+    ]
+  }
+}
