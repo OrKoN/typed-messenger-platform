@@ -16,6 +16,7 @@
     "declaration": true
   },
   "include": [
+    "modules.d.ts",
     "test/**/*.ts",
     "lib/**/*.ts",
     "types/**/*.ts",
