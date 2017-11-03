@@ -1,14 +1,9 @@
 import * as webhookApi from './types/webhook-api';
+import bodyParser = require('koa-bodyparser');
+import dbg = require('./dbg');
 import events = require('events');
 import Koa = require('koa');
-import bodyParser = require('koa-bodyparser');
-import debug = require('debug');
-
-const dbg = debug('messenger-platform');
-
-export type EventHandlerFn = (
-  msg: webhookApi.MessageReceivedEvent,
-) => Promise<any>;
+import http = require('http');
 
 export function createServer(cfg: Config): Server {
   return new Server(cfg);
@@ -43,7 +38,7 @@ export class Server extends events.EventEmitter {
     return this;
   }
 
-  done(): any {
+  done(): Serverfn {
     return this.app.callback();
   }
 
@@ -59,14 +54,14 @@ export class Server extends events.EventEmitter {
   _getVerificationRequestHandler() {
     return async (ctx: Koa.Context, next: Function) => {
       if (ctx.method === 'GET') {
-        return this._handleVerificationRequest(ctx, this.cfg);
+        return this._handleVerificationRequest(ctx, this.cfg.verificationToken);
       }
       await next();
     };
   }
 
   _getMessageHandler() {
-    return async (ctx: Koa.Context, _next: Function) => {
+    return async (ctx: Koa.Context) => {
       if (
         ctx.request.body &&
         (<webhookApi.WebhookEvent>ctx.request.body).object === 'page'
@@ -91,20 +86,21 @@ export class Server extends events.EventEmitter {
     };
   }
 
-  async _handleVerificationRequest(ctx: Koa.Context, cfg: Config) {
-    let mode = ctx.query['hub.mode'];
-    let token = ctx.query['hub.verify_token'];
-    let challenge = ctx.query['hub.challenge'];
+  async _handleVerificationRequest(
+    ctx: Koa.Context,
+    verificationToken: string,
+  ) {
     if (
-      mode &&
-      token &&
-      mode === 'subscribe' &&
-      token === cfg.verificationToken
+      ctx.query['hub.mode'] &&
+      ctx.query['hub.verify_token'] &&
+      ctx.query['hub.mode'] === 'subscribe' &&
+      ctx.query['hub.verify_token'] === verificationToken
     ) {
       ctx.status = 200;
-      return (ctx.body = challenge);
+      ctx.body = ctx.query['hub.challenge'];
+    } else {
+      ctx.status = 403;
     }
-    ctx.status = 403;
   }
 
   isTextMessage(event: webhookApi.MessageReceivedEvent) {
@@ -128,17 +124,17 @@ export class Server extends events.EventEmitter {
   ): Promise<any> {
     for (let entry of event.entry) {
       for (let msg of entry.messaging) {
-        dbg('webhoook message %j', msg);
+        dbg('webhoook message received %j', msg);
         if (this.isTextMessage(msg)) {
-          await this._runHandlers(msg, handlers.onTextMessage);
+          await this._executeHandlers(msg, handlers.onTextMessage);
         } else if (this.isLocationMessage(msg)) {
-          await this._runHandlers(msg, handlers.onLocationMessage);
+          await this._executeHandlers(msg, handlers.onLocationMessage);
         }
       }
     }
   }
 
-  async _runHandlers(
+  async _executeHandlers(
     event: webhookApi.MessageReceivedEvent,
     handlers: EventHandlerFn[],
   ) {
@@ -155,3 +151,12 @@ export class Server extends events.EventEmitter {
 export interface Config {
   verificationToken: string;
 }
+
+export type EventHandlerFn = (
+  msg: webhookApi.MessageReceivedEvent,
+) => Promise<any>;
+
+export type Serverfn = (
+  request: http.IncomingMessage,
+  response: http.ServerResponse,
+) => void;

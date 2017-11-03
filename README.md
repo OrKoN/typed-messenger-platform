@@ -2,12 +2,16 @@
 
 Toolkit for developing applications for the [Messenger platform](https://developers.facebook.com/docs/messenger-platform) written in TypeScript.
 
-### Principles:
+### State
+
+In active development. Feel free to open an issue if you would like to contribute.
+
+### Principles
 
  - follow the original API as closely as possible and provide type information
  - de-couple server (for receiving webhooks), client (for sending messages etc) and message builder parts (POJO)
 
-### Goals:
+### Goals
 
  - full support for [Send API](https://developers.facebook.com/docs/messenger-platform/reference/send-api), [message received events](https://developers.facebook.com/docs/messenger-platform/reference/webhook-events/messages), [messaging_postbacks](https://developers.facebook.com/docs/messenger-platform/reference/webhook-events/messaging_postbacks) (not fully implemented yet)
  - helpers to de-duplicate and queue messages
@@ -68,3 +72,7 @@ messageTo(recipient)
 ```
 
 Also see [examples](examples).
+
+## LICENCE
+
+[MIT](LICENCE)

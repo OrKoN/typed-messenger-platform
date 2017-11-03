@@ -1,8 +1,6 @@
-import r2 = require('r2');
-import debug = require('debug');
 import * as sendApi from './types/send-api';
-
-const dbg = debug('messenger-platform');
+import dbg = require('./dbg');
+import r2 = require('r2');
 
 export async function sendMessage(token: string, json: sendApi.Message) {
   dbg('sending message %j', json);
