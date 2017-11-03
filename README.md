@@ -1,4 +1,4 @@
-# node-messenger-platform
+# typed-messenger-platform
 
 Toolkit for developing applications for the [Messenger platform](https://developers.facebook.com/docs/messenger-platform) written in TypeScript.
 
@@ -24,11 +24,15 @@ To interact with the messenger platform you require a fb app connected to a page
 
 ## Usage
 
+```sh
+npm i typed-messenger-platform
+```
+
 Echo bot:
 
 ```typescript
 import http = require('http');
-import * as platform from '../index';
+import * as platform from 'typed-messenger-platform';
 
 const PAGE_TOKEN = 'TOKEN';
 

@@ -1,5 +1,5 @@
 {
-  "name": "messenger-platform",
+  "name": "typed-messenger-platform",
   "version": "0.1.0",
   "description": "Client/Server for FB messenger platform written in TypeScript",
   "main": "dist/index",
@@ -11,6 +11,13 @@
     "compile": "npm run clean && tsc -p .",
     "watch": "tsc -w -p .",
     "clean": "rm -rf dist"
+  },
+  "bugs": {
+    "url": "http://github.com/OrKoN/typed-messenger-platform/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/OrKoN/typed-messenger-platform.git"
   },
   "keywords": [
     "fb messenger"
@@ -45,5 +52,8 @@
       "prettier --single-quote --trailing-comma all --write",
       "git add"
     ]
+  },
+  "engines": {
+    "node": ">=6"
   }
 }
