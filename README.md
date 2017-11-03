@@ -39,15 +39,17 @@ const PAGE_TOKEN = 'TOKEN';
 const { sendMessage, messageTo } = platform;
 
 const fbServer = platform
+  // initial configuration is passed via createServer
   .createServer({
-    // initial configuration
     verificationToken: 'YOUR TOKEN',
   })
-  // handle messages with .onTextMessage or .onLocationMessage etc
+  // handle messages of specific types with .onTextMessage, .onLocationMessage etc
   .onTextMessage(
     async (testMessage: platform.webhookApi.MessageReceivedEvent) => {
-      // sendMessage to actually send a message
-      // messageTo().text to build a message
+      // decide
+      // - when to construct a message (with the builder interface `messageTo`)
+      // - when to actually send a message (with `sendMessage` call)
+      // - whether to process synchronously or concurrently (with await)
       await sendMessage(
         PAGE_TOKEN,
         messageTo(testMessage.sender).text(
@@ -60,19 +62,20 @@ const fbServer = platform
 // call .done to get node http compatible handler
 http.createServer(fbServer.done()).listen(3000);
 
+// monitor errors asynchronously
 fbServer.on('error', (err: Error) => {
   console.log('error', err);
 })
 
 ```
 
-Message builder allows chaining calls to build a message:
+Message builder interface allows chaining calls to build a message:
 
 ```typescript
 messageTo(recipient)
-  .text('Answer the question: In which country is Stuttgart located?')
+  .text('Answer the question: Where is Berlin?')
   .quickTextReply('Germany', 'GER')
-  .quickLocationReply(),
+  .quickLocationReply();
 ```
 
 Also see [examples](examples).
