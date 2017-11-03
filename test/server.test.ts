@@ -4,7 +4,7 @@ import * as chai from 'chai';
 
 const expect = chai.expect;
 
-describe('_handleEvent', () => {
+describe('server', () => {
   const server = new Server({
     verificationToken: 'bogus',
   });
