@@ -4,7 +4,7 @@ Toolkit for developing applications for the [Messenger platform](https://develop
 
 ### State
 
-In active development. Feel free to open an issue if you would like to contribute or check out existing issues https://github.com/OrKoN/typed-messenger-platform/issues.
+In active development. Feel free to [open an issue](https://github.com/OrKoN/typed-messenger-platform/issues/new) if you would like to contribute or check out [existing issues](https://github.com/OrKoN/typed-messenger-platform/issues).
 
 ### Principles
 
@@ -20,13 +20,14 @@ In active development. Feel free to open an issue if you would like to contribut
 
 ## Setup
 
-To interact with the messenger platform you require a fb app connected to a page. Set up a webhook connecting the page with your server.
+To interact with the messenger platform you require a fb app connected to a page. Set up a webhook connecting the page with your server. To install the module:
 
-## Usage
 
 ```sh
 npm i typed-messenger-platform
 ```
+
+## Usage
 
 Echo bot:
 
