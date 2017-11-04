@@ -47,6 +47,83 @@ export class MessageBuilder implements sendApi.Message {
     return this;
   }
 
+  audio(url: string, is_reusable = true) {
+    this.message = {
+      ...this.message,
+      attachment: {
+        type: 'audio',
+        payload: {
+          url,
+          is_reusable,
+        },
+      },
+    };
+    return this;
+  }
+
+  video(url: string, is_reusable = true) {
+    this.message = {
+      ...this.message,
+      attachment: {
+        type: 'video',
+        payload: {
+          url,
+          is_reusable,
+        },
+      },
+    };
+    return this;
+  }
+
+  file(url: string, is_reusable = true) {
+    this.message = {
+      ...this.message,
+      attachment: {
+        type: 'file',
+        payload: {
+          url,
+          is_reusable,
+        },
+      },
+    };
+    return this;
+  }
+
+  buttons(text: string, buttons: sendApi.ButtonTemplateButton[]) {
+    this.message = {
+      ...this.message,
+      attachment: {
+        type: 'template',
+        payload: {
+          template_type: 'button',
+          text,
+          buttons,
+        },
+      },
+    };
+    return this;
+  }
+
+  genericTemplate(
+    elements: sendApi.GenericTemplateElement[],
+    imageAspectRatio: sendApi.ImageAspectRatio = 'horizontal',
+    sharable = false,
+  ) {
+    this.message = {
+      ...this.message,
+      attachment: {
+        type: 'template',
+        payload: {
+          template_type: 'generic',
+          sharable,
+          image_aspect_ratio: imageAspectRatio,
+          elements,
+        },
+      },
+    };
+    return this;
+  }
+
   quickTextReply(title: string, payload?: string, imageUrl?: string) {
     this.message = {
       ...this.message,
@@ -72,6 +149,24 @@ export class MessageBuilder implements sendApi.Message {
           content_type: 'location',
         },
       ],
+    };
+    return this;
+  }
+
+  notification(type: sendApi.NotificaionType) {
+    this.notification_type = type;
+    return this;
+  }
+
+  taggedWith(tag: string) {
+    this.tag = tag;
+    return this;
+  }
+
+  metadata(metadata: string) {
+    this.message = {
+      ...this.message,
+      metadata,
     };
     return this;
   }

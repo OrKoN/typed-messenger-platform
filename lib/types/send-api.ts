@@ -45,12 +45,67 @@ export interface FallbackAttachment {
   payload: FallbackPayload;
 }
 
+export interface TemplateAttachment {
+  type: 'template';
+  payload: ButtonTemplate | GenericTemplate;
+}
+
 export type Attachment =
   | ImageAttachment
   | AudioAttachment
   | VideoAttachment
   | FileAttachment
-  | LocationAttachment;
+  | LocationAttachment
+  | TemplateAttachment;
+
+export type ButtonTemplateButton =
+  | UrlButton
+  | PostbackButton
+  | CallButton
+  | LoginButton
+  | LogoutButton
+  | GamePlayButton;
+export type GenericTemplateButton =
+  | UrlButton
+  | PostbackButton
+  | CallButton
+  | LoginButton
+  | LogoutButton
+  | GamePlayButton;
+
+export interface UrlButton {
+  type: 'web_url';
+  url: string;
+  title: string;
+}
+
+export interface PostbackButton {
+  type: 'postback';
+  payload: string;
+  title: string;
+}
+
+export interface CallButton {
+  type: 'phone_number';
+  payload: string;
+  title: string;
+}
+
+export interface LoginButton {
+  type: 'account_link';
+  url: string;
+}
+
+export interface LogoutButton {
+  type: 'account_unlink';
+}
+
+export interface GamePlayButton {
+  type: 'game_play';
+  title: string;
+  payload: string;
+  game_metadata: { player_id: string } | { context_id: string };
+}
 
 export interface Message {
   recipient: Recipient;
@@ -67,28 +122,31 @@ export interface Message {
 
 export type SenderAction = 'typing_on' | 'typing_off' | 'mark_seen';
 export type NotificaionType = 'REGULAR' | 'SILENT_PUSH' | 'NO_PUSH';
-export interface Button {
-  type: 'web_url' | 'postback';
-  url: string;
-  title: string;
-  payload?: string;
+
+export interface ButtonTemplate {
+  template_type: 'button';
+  text: string;
+  buttons: Array<ButtonTemplateButton>;
 }
 
-export interface GenericTemplateAttachment {
-  type: 'template';
-  payload: {
-    template_type: 'generic';
-    elements: Array<{
-      title: string;
-      image_url: string;
-      subtitle: string;
-      default_action?: {
-        type: 'web_url';
-        url: string;
-        messenger_extensions: boolean;
-        webview_height_ratio: 'COMPACT' | 'TALL' | 'FULL';
-      };
-      buttons?: Button[];
-    }>;
-  };
+export interface GenericTemplate {
+  template_type: 'generic';
+  sharable?: boolean;
+  image_aspect_ratio: ImageAspectRatio;
+  elements: Array<GenericTemplateElement>;
 }
+
+export interface GenericTemplateElement {
+  title: string;
+  image_url?: string;
+  subtitle?: string;
+  default_action?: {
+    type: 'web_url';
+    url: string;
+    messenger_extensions: boolean;
+    webview_height_ratio: 'COMPACT' | 'TALL' | 'FULL';
+  };
+  buttons?: GenericTemplateButton[];
+}
+
+export type ImageAspectRatio = 'horizontal' | 'square';
