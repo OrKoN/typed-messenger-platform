@@ -9,11 +9,23 @@ export function createServer(cfg: Config): Server {
   return new Server(cfg);
 }
 
+export enum HandlerType {
+  text = 'text',
+  location = 'location',
+  audio = 'audio',
+  video = 'video',
+  file = 'file',
+  image = 'image',
+  any = 'any',
+  unknown = 'unknown',
+}
+
+export interface Handlers {
+  [key: string]: EventHandlerFn[];
+}
+
 export class Server extends events.EventEmitter {
-  handlers: {
-    onTextMessage: EventHandlerFn[];
-    onLocationMessage: EventHandlerFn[];
-  };
+  handlers: Handlers = {};
   app: Koa;
   cfg: Config;
 
@@ -21,25 +33,48 @@ export class Server extends events.EventEmitter {
     super();
     this.cfg = cfg;
     this.app = new Koa();
-    this.handlers = {
-      onTextMessage: [],
-      onLocationMessage: [],
-    };
     this._setupMiddleware();
   }
 
   onTextMessage(handler: EventHandlerFn) {
-    this.handlers.onTextMessage.push(handler);
-    return this;
+    return this._addHandler(HandlerType.text, handler);
   }
 
   onLocationMessage(handler: EventHandlerFn) {
-    this.handlers.onLocationMessage.push(handler);
-    return this;
+    return this._addHandler(HandlerType.location, handler);
+  }
+
+  onAudioMessage(handler: EventHandlerFn) {
+    return this._addHandler(HandlerType.audio, handler);
+  }
+
+  onVideoMessage(handler: EventHandlerFn) {
+    return this._addHandler(HandlerType.video, handler);
+  }
+
+  onFileMessage(handler: EventHandlerFn) {
+    return this._addHandler(HandlerType.file, handler);
+  }
+
+  onImageMessage(handler: EventHandlerFn) {
+    return this._addHandler(HandlerType.image, handler);
+  }
+
+  onAnyMessage(handler: EventHandlerFn) {
+    return this._addHandler(HandlerType.any, handler);
+  }
+
+  onUnknownMessage(handler: EventHandlerFn) {
+    return this._addHandler(HandlerType.unknown, handler);
   }
 
   done(): Serverfn {
     return this.app.callback();
+  }
+
+  _addHandler(type: HandlerType, handler: EventHandlerFn) {
+    this.handlers[type] = [...(this.handlers[type] || []), handler];
+    return this;
   }
 
   _setupMiddleware() {
@@ -66,7 +101,7 @@ export class Server extends events.EventEmitter {
         ctx.request.body &&
         (<webhookApi.WebhookEvent>ctx.request.body).object === 'page'
       ) {
-        await this._handleEvent(ctx.request.body, this.handlers);
+        await this._handleEvent(ctx.request.body);
         ctx.status = 200;
         ctx.body = 'EVENT_RECEIVED';
       }
@@ -103,11 +138,11 @@ export class Server extends events.EventEmitter {
     }
   }
 
-  isTextMessage(event: webhookApi.MessageReceivedEvent) {
+  _isTextMessage(event: webhookApi.MessageReceivedEvent) {
     return event.message !== undefined && event.message.text !== undefined;
   }
 
-  isLocationMessage(event: webhookApi.MessageReceivedEvent) {
+  _isLocationMessage(event: webhookApi.MessageReceivedEvent) {
     return (
       event.message !== undefined &&
       event.message.attachments !== undefined &&
@@ -115,20 +150,64 @@ export class Server extends events.EventEmitter {
     );
   }
 
-  async _handleEvent(
-    event: webhookApi.WebhookEvent,
-    handlers: {
-      onTextMessage: EventHandlerFn[];
-      onLocationMessage: EventHandlerFn[];
-    },
-  ): Promise<any> {
+  _isAudioMessage(event: webhookApi.MessageReceivedEvent) {
+    return (
+      event.message !== undefined &&
+      event.message.attachments !== undefined &&
+      event.message.attachments.some(a => a.type === 'audio')
+    );
+  }
+
+  _isVideoMessage(event: webhookApi.MessageReceivedEvent) {
+    return (
+      event.message !== undefined &&
+      event.message.attachments !== undefined &&
+      event.message.attachments.some(a => a.type === 'video')
+    );
+  }
+
+  _isImageMessage(event: webhookApi.MessageReceivedEvent) {
+    return (
+      event.message !== undefined &&
+      event.message.attachments !== undefined &&
+      event.message.attachments.some(a => a.type === 'image')
+    );
+  }
+
+  _isFileMessage(event: webhookApi.MessageReceivedEvent) {
+    return (
+      event.message !== undefined &&
+      event.message.attachments !== undefined &&
+      event.message.attachments.some(a => a.type === 'file')
+    );
+  }
+
+  _getMessageType(msg: webhookApi.MessageEvent): HandlerType {
+    if (this._isTextMessage(msg)) {
+      return HandlerType.text;
+    } else if (this._isLocationMessage(msg)) {
+      return HandlerType.location;
+    } else if (this._isAudioMessage(msg)) {
+      return HandlerType.audio;
+    } else if (this._isVideoMessage(msg)) {
+      return HandlerType.video;
+    } else if (this._isFileMessage(msg)) {
+      return HandlerType.file;
+    } else if (this._isImageMessage(msg)) {
+      return HandlerType.image;
+    }
+    return HandlerType.unknown;
+  }
+
+  async _handleEvent(event: webhookApi.WebhookEvent): Promise<any> {
     for (let entry of event.entry) {
       for (let msg of entry.messaging) {
         dbg('webhoook message received %j', msg);
-        if (this.isTextMessage(msg)) {
-          await this._executeHandlers(msg, handlers.onTextMessage);
-        } else if (this.isLocationMessage(msg)) {
-          await this._executeHandlers(msg, handlers.onLocationMessage);
+        const type = this._getMessageType(msg);
+        dbg('webhoook message type %j', type);
+        await this._executeHandlers(msg, this.handlers[type]);
+        if (type !== HandlerType.unknown) {
+          await this._executeHandlers(msg, this.handlers[HandlerType.any]);
         }
       }
     }
@@ -138,7 +217,7 @@ export class Server extends events.EventEmitter {
     event: webhookApi.MessageReceivedEvent,
     handlers: EventHandlerFn[],
   ) {
-    for (const handler of handlers) {
+    for (const handler of handlers || []) {
       try {
         await handler(event);
       } catch (err) {

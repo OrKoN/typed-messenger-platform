@@ -80,6 +80,19 @@ messageTo(recipient)
 
 Also see [examples](examples).
 
+The following message handlers (`on[MessageType]Message`) are available: 
+
+- onTextMessage - fired if the message contains text
+- onLocationMessage - fired if the message contains a location attachment
+- onAudioMessage - fired if the message contains an audio attachment
+- onVideoMessage - fired if the message contains a video attachment
+- onFileMessage - fired if the message contains a file attachment
+- onImageMessage - fired if the message contains a image attachment
+- onUnknownMessage - fired for every message of unknown type
+- onAnyMesage - fired for every message of known type
+
+The messages are evaluated in order and only one of the handlers is called for any given message, the one that matches first. Exceptions are onAnyMesage which is fired always for any message of known type (even if a more specific handlers were already called) and onUnknownMessage which is called for every message of unknown type.
+
 ## LICENCE
 
 [MIT](LICENCE)
