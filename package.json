@@ -1,6 +1,6 @@
 {
   "name": "typed-messenger-platform",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Client/Server for FB messenger platform written in TypeScript",
   "main": "dist/index",
   "typings": "dist/index",
